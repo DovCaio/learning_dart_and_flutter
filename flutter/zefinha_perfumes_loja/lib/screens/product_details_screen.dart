@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zefinha_perfumes_loja/models/product.dart';
+import 'package:zefinha_perfumes_loja/screens/product_edit_screen.dart';
 
 class ProductDetail extends StatelessWidget {
   final Product product;
@@ -175,7 +176,12 @@ class ProductDetail extends StatelessWidget {
               height: 54,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // Implementaremos a edição posteriormente.
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductEditScreen(product: product),
+                    ),
+                  );
                 },
                 icon: const Icon(Icons.edit_outlined),
                 label: const Text('Editar produto'),
