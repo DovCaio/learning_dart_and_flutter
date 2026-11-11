@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zefinha_perfumes_loja/screens/product_details_screen.dart';
+import 'package:zefinha_perfumes_loja/screens/product_form_screen.dart';
 
 import '../models/product.dart';
 
@@ -87,6 +88,16 @@ class ProductScreen extends StatelessWidget {
             },
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProductFormScreen()),
+          );
+        },
+        tooltip: 'Cadastrar produto',
+        child: const Icon(Icons.add),
       ),
     );
   }
