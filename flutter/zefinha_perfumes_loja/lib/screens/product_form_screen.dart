@@ -34,7 +34,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
       Product product = Product(
-        id: '1',
+        id: 1,
         name: _nameController.text,
         brand: _brandController.text,
         volume: int.parse(_volumeController.text),

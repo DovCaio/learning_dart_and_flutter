@@ -16,6 +16,9 @@ class _ProductDetail extends State<ProductDetailsScreen> {
 
   late Product product;
 
+  bool isLoading = true;
+  String? errorMessage;
+
   static const Color primaryColor = Color(0xFF7051A3);
   static const Color backgroundColor = Color(0xFFF8F6FA);
 
@@ -37,9 +40,14 @@ class _ProductDetail extends State<ProductDetailsScreen> {
 
       setState(() {
         product = result;
+        isLoading = false;
       });
     } catch (error) {
       if (!mounted) return;
+      setState(() {
+        isLoading = false;
+        errorMessage = "$error";
+      });
     }
   }
 
@@ -59,176 +67,197 @@ class _ProductDetail extends State<ProductDetailsScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Imagem ilustrativa do produto
-            _buildProductImage(),
+        child: Builder(
+          builder: (context) {
+            if (isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-            const SizedBox(height: 28),
+            if (errorMessage != null) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Erro ao carregar o produto: $errorMessage'),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              );
+            }
 
-            // Marca
-            Text(
-              product.brand.toUpperCase(),
-              style: const TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2,
-                fontSize: 12,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Nome
-            Text(
-              product.name,
-              style: const TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF292331),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              '${product.volume} ml',
-              style: const TextStyle(fontSize: 15, color: Colors.black54),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Preço
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Preço de venda',
-                    style: TextStyle(color: Colors.black54, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    formattedPrice,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Informações do estoque',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF292331),
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            Row(
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildStockCard(
-                    icon: Icons.inventory_2_outlined,
-                    label: 'Quantidade',
-                    value: '${product.quantity}',
+                // Imagem ilustrativa do produto
+                _buildProductImage(),
+
+                const SizedBox(height: 28),
+
+                // Marca
+                Text(
+                  product.brand.toUpperCase(),
+                  style: const TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStockCard(
-                    icon: Icons.water_drop_outlined,
-                    label: 'Volume',
-                    value: '${product.volume} ml',
+
+                const SizedBox(height: 8),
+
+                // Nome
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF292331),
                   ),
                 ),
-              ],
-            ),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 8),
 
-            // Status do estoque
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: product.quantity > 0
-                    ? const Color(0xFFE8F5E9)
-                    : const Color(0xFFFFEBEE),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    product.quantity > 0
-                        ? Icons.check_circle_outline
-                        : Icons.warning_amber_rounded,
-                    color: product.quantity > 0 ? Colors.green : Colors.red,
+                Text(
+                  '${product.volume} ml',
+                  style: const TextStyle(fontSize: 15, color: Colors.black54),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Preço
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      product.quantity > 0
-                          ? 'Produto disponível em estoque'
-                          : 'Produto sem estoque disponível',
-                      style: TextStyle(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Preço de venda',
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        formattedPrice,
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                const Text(
+                  'Informações do estoque',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF292331),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStockCard(
+                        icon: Icons.inventory_2_outlined,
+                        label: 'Quantidade',
+                        value: '${product.quantity}',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStockCard(
+                        icon: Icons.water_drop_outlined,
+                        label: 'Volume',
+                        value: '${product.volume} ml',
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Status do estoque
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: product.quantity > 0
+                        ? const Color(0xFFE8F5E9)
+                        : const Color(0xFFFFEBEE),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        product.quantity > 0
+                            ? Icons.check_circle_outline
+                            : Icons.warning_amber_rounded,
+                        color: product.quantity > 0 ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          product.quantity > 0
+                              ? 'Produto disponível em estoque'
+                              : 'Produto sem estoque disponível',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: product.quantity > 0
+                                ? Colors.green.shade800
+                                : Colors.red.shade800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Botão de edição
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProductEditScreen(product: product),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Editar produto'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: product.quantity > 0
-                            ? Colors.green.shade800
-                            : Colors.red.shade800,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Botão de edição
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductEditScreen(product: product),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text('Editar produto'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
