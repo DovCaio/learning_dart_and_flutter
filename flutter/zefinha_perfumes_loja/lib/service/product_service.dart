@@ -59,4 +59,17 @@ class ProductService {
       'Erro ao modificar o produto: ${response.statusCode} - ${response.body}',
     );
   }
+
+  Future<void> deleteProduct(int id) async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl/products/delete?id=$id"),
+    );
+    if (response.statusCode == 204) {
+      return;
+    }
+
+    throw Exception(
+      'Erro ao deletar o produto: ${response.statusCode} - ${response.body}',
+    );
+  }
 }

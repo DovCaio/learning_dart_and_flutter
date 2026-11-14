@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zefinha_perfumes_loja/models/product.dart';
+import 'package:zefinha_perfumes_loja/screens/products_screens.dart';
 import 'package:zefinha_perfumes_loja/service/product_service.dart';
 
 class ProductEditScreen extends StatefulWidget {
@@ -186,6 +187,23 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          try {
+            await productService.deleteProduct(widget.product.id);
+            if (!mounted) return;
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => ProductScreen()),
+              (route) => false,
+            );
+          } catch (error) {
+            debugPrint("$error");
+          }
+        },
+        tooltip: 'Deletar produto',
+        child: const Icon(Icons.delete),
       ),
     );
   }
