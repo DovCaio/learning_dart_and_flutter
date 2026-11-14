@@ -1,17 +1,17 @@
 # zefinha_perfumes_loja
 
-A new Flutter project.
+## Objective
 
-## Getting Started
+Just learn the basic of flutter using a crud system for a perfume stores.
 
-This project is a starting point for a Flutter application.
+## How Execute
 
-A few resources to get you started if this is your first Flutter project:
+Once you have instaled flutter on you pc execute:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter run -d chrome //Or another service
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Backend is located in:
+
+https://github.com/DovCaio/learning_django
