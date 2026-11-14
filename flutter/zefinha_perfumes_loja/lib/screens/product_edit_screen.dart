@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zefinha_perfumes_loja/models/product.dart';
+import 'package:zefinha_perfumes_loja/service/product_service.dart';
 
 class ProductEditScreen extends StatefulWidget {
   final Product product;
@@ -12,6 +13,8 @@ class ProductEditScreen extends StatefulWidget {
 
 class _ProductEditScreenState extends State<ProductEditScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  final ProductService productService = ProductService();
 
   late final TextEditingController _nameController;
   late final TextEditingController _brandController;
@@ -51,9 +54,24 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     super.dispose();
   }
 
-  void _editProduct() {
+  Future<void> _editProduct() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pop(context);
+      Product product = Product(
+        id: widget.product.id,
+        name: _nameController.text,
+        brand: _brandController.text,
+        volume: int.parse(_volumeController.text),
+        price: double.parse(_priceController.text.replaceAll(',', '.')),
+        quantity: int.parse(_quantityController.text),
+      );
+
+      try {
+        await productService.putProduct(product);
+        if (!mounted) return;
+        Navigator.pop(context);
+      } catch (error) {
+        debugPrint("$error");
+      }
     }
   }
 

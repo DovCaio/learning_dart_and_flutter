@@ -43,4 +43,20 @@ class ProductService {
       'Erro ao criar produto: ${response.statusCode} - ${response.body}',
     );
   }
+
+  Future<void> putProduct(Product product) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/products/put"),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(product.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    throw Exception(
+      'Erro ao modificar o produto: ${response.statusCode} - ${response.body}',
+    );
+  }
 }
