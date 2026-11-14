@@ -19,6 +19,9 @@ class _ProductScreenState extends State<ProductScreen> {
   bool isLoading = true;
   String? errorMessage;
 
+  static const Color primaryColor = Color(0xFF593A72);
+  static const Color backgroundColor = Color(0xFFF8F6FA);
+
   @override
   void initState() {
     super.initState();
@@ -49,10 +52,22 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
+
       appBar: AppBar(
-        title: const Text("Zefinha Perfumes"),
-        backgroundColor: Colors.deepPurple,
+        elevation: 0,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
+        title: const Row(
+          children: [
+            Icon(Icons.spa_outlined, size: 27),
+            SizedBox(width: 10),
+            Text(
+              'Zefinha Perfumes',
+              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
+            ),
+          ],
+        ),
       ),
 
       body: Center(
@@ -61,85 +76,242 @@ class _ProductScreenState extends State<ProductScreen> {
           child: Builder(
             builder: (context) {
               if (isLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(color: primaryColor),
+                );
               }
 
               if (errorMessage != null) {
                 return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 52,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Não foi possível carregar os produtos',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            loadProducts();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Tentar novamente'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              if (products.isEmpty) {
+                return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Erro ao carregar produtos: $errorMessage'),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          loadProducts();
-                        },
-                        child: const Text('Tentar novamente'),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Sua vitrine está vazia',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Cadastre seu primeiro produto!',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 15,
+                        ),
                       ),
                     ],
                   ),
                 );
               }
 
-              if (products.isEmpty) {
-                return const Center(child: Text('Nenhum produto cadastrado.'));
-              }
+              return RefreshIndicator(
+                color: primaryColor,
+                onRefresh: loadProducts,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  itemCount: products.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 22),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Nossa vitrine',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              '${products.length} produto(s) cadastrado(s)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
+                    final product = products[index - 1];
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.shopping_bag),
+                    return Card(
+                      elevation: 1,
+                      shadowColor: primaryColor.withValues(alpha: 0.10),
+                      color: Colors.white,
+                      margin: const EdgeInsets.only(bottom: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      title: Text(product.name),
-                      subtitle: Text(product.brand),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ProductDetailsScreen(productId: product.id),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetailsScreen(productId: product.id),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 18,
                           ),
-                        );
-                      },
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'R\$ ${product.price}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 54,
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF0EAF5),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: const Icon(
+                                  Icons.shopping_bag_outlined,
+                                  color: primaryColor,
+                                  size: 27,
+                                ),
+                              ),
+
+                              const SizedBox(width: 15),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF30243A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      product.brand,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'R\$ ${product.price}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 14,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             },
           ),
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProductFormScreen()),
           ).then((_) => loadProducts());
         },
-        tooltip: 'Cadastrar produto',
-        child: const Icon(Icons.add),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.add),
+        label: const Text(
+          'Novo produto',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
