@@ -1,17 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:zefinha_perfumes_loja/models/product.dart';
 import 'package:zefinha_perfumes_loja/screens/product_edit_screen.dart';
+import 'package:zefinha_perfumes_loja/service/product_service.dart';
 
-class ProductDetail extends StatelessWidget {
-  final Product product;
+class ProductDetailsScreen extends StatefulWidget {
+  final int productId;
 
-  const ProductDetail({super.key, required this.product});
+  const ProductDetailsScreen({super.key, required this.productId});
+  @override
+  State<ProductDetailsScreen> createState() => _ProductDetail();
+}
+
+class _ProductDetail extends State<ProductDetailsScreen> {
+  final ProductService productService = ProductService();
+
+  late Product product;
 
   static const Color primaryColor = Color(0xFF7051A3);
   static const Color backgroundColor = Color(0xFFF8F6FA);
 
   String get formattedPrice {
     return 'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadProduct();
+  }
+
+  Future<void> loadProduct() async {
+    try {
+      final result = await productService.getProduct(widget.productId);
+
+      if (!mounted) return;
+
+      setState(() {
+        product = result;
+      });
+    } catch (error) {
+      if (!mounted) return;
+    }
   }
 
   @override

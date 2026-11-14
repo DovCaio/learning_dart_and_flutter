@@ -3,44 +3,48 @@ import 'package:zefinha_perfumes_loja/screens/product_details_screen.dart';
 import 'package:zefinha_perfumes_loja/screens/product_form_screen.dart';
 
 import '../models/product.dart';
+import '../service/product_service.dart';
 
-class ProductScreen extends StatelessWidget {
-  ProductScreen({super.key});
+class ProductScreen extends StatefulWidget {
+  const ProductScreen({super.key});
 
-  final List<Product> products = [
-    Product(
-      id: '1',
-      name: 'Malbec',
-      brand: 'O Boticário',
-      volume: 100,
-      price: 159.90,
-      quantity: 12,
-    ),
-    Product(
-      id: '2',
-      name: 'Egeo Dolce',
-      brand: 'O Boticário',
-      volume: 90,
-      price: 129.90,
-      quantity: 8,
-    ),
-    Product(
-      id: '3',
-      name: 'Kaiak',
-      brand: 'Natura',
-      volume: 100,
-      price: 119.90,
-      quantity: 5,
-    ),
-    Product(
-      id: '4',
-      name: '212 VIP',
-      brand: 'Carolina Herrera',
-      volume: 80,
-      price: 499.90,
-      quantity: 3,
-    ),
-  ];
+  @override
+  State<ProductScreen> createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends State<ProductScreen> {
+  final ProductService productService = ProductService();
+
+  List<ProductMinimized> products = [];
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    loadProducts();
+  }
+
+  Future<void> loadProducts() async {
+    try {
+      final result = await productService.getProducts();
+
+      if (!mounted) return;
+
+      setState(() {
+        products = result;
+        isLoading = false;
+        errorMessage = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+        errorMessage = error.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,51 +54,89 @@ class ProductScreen extends StatelessWidget {
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
+
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
+          child: Builder(
+            builder: (context) {
+              if (isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.shopping_bag)),
-                  title: Text(product.name),
-                  subtitle: Text('${product.brand} * ${product.volume} ml'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProductDetail(product: product),
-                      ),
-                    );
-                  },
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+              if (errorMessage != null) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'R\$ ${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      Text('Erro ao carregar produtos: $errorMessage'),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          loadProducts();
+                        },
+                        child: const Text('Tentar novamente'),
                       ),
                     ],
                   ),
-                ),
+                );
+              }
+
+              if (products.isEmpty) {
+                return const Center(child: Text('Nenhum produto cadastrado.'));
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.shopping_bag),
+                      ),
+                      title: Text(product.name),
+                      subtitle: Text(product.brand),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductDetailsScreen(productId: product.id),
+                          ),
+                        );
+                      },
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'R\$ ${product.price}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProductFormScreen()),
-          );
+          ).then((_) => loadProducts());
         },
         tooltip: 'Cadastrar produto',
         child: const Icon(Icons.add),
