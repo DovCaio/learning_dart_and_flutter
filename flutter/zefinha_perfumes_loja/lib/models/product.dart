@@ -25,6 +25,17 @@ class Product {
       quantity: json['quantity'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'brand': brand,
+      'volume': volume,
+      'price': price,
+      'quantity': quantity,
+    };
+  }
 }
 
 class ProductMinimized {

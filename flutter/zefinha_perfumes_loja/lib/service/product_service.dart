@@ -9,9 +9,7 @@ class ProductService {
   final String baseUrl = 'http://localhost:8000';
 
   Future<List<ProductMinimized>> getProducts() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/products/get_all')
-    );
+    final response = await http.get(Uri.parse('$baseUrl/products/get_all'));
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => ProductMinimized.fromJson(json)).toList();
@@ -28,5 +26,21 @@ class ProductService {
       return Product.fromJson(data);
     }
     throw Exception("Erro ao buscar um produto");
+  }
+
+  Future<void> postProduct(Product product) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/products/create'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(product.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return;
+    }
+
+    throw Exception(
+      'Erro ao criar produto: ${response.statusCode} - ${response.body}',
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:zefinha_perfumes_loja/models/product.dart';
+import 'package:zefinha_perfumes_loja/service/product_service.dart';
 
 class ProductFormScreen extends StatefulWidget {
   const ProductFormScreen({super.key});
@@ -9,6 +11,8 @@ class ProductFormScreen extends StatefulWidget {
 
 class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  final ProductService productService = ProductService();
 
   final _nameController = TextEditingController();
   final _brandController = TextEditingController();
@@ -27,9 +31,25 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     super.dispose();
   }
 
-  void _saveProduct() {
+  Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pop(context);
+      Product product = Product(
+        id: '1',
+        name: _nameController.text,
+        brand: _brandController.text,
+        volume: int.parse(_volumeController.text),
+        price: double.parse(_priceController.text),
+        quantity: int.parse(_quantityController.text),
+      );
+
+      try {
+        await productService.postProduct(product);
+
+        if (!mounted) return;
+        Navigator.pop(context);
+      } catch (error) {
+        debugPrint('Erro ao cadastrar produto: $error');
+      }
     }
   }
 
